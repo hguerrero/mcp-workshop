@@ -1,0 +1,22 @@
+# rename this file to terraform.tfvars and fill in your values
+
+# Required - Get from Konnect UI: Personal Access Token
+# konnect_personal_access_token = "REPLACE_ME"
+
+# Number of students to provision (default: 5)
+student_count = 5
+
+# Starting number for student IDs (default: 1)
+student_start_number = 1
+
+# Prefix for student names (default: student)
+student_name_prefix = "student"
+
+# Optional: Labels for control planes
+# control_plane_labels = {
+#   purpose    = "workshop"
+#   managed_by = "terraform"
+# }
+
+# Optional: Control plane description
+# control_plane_description = "Serverless gateway for workshop student"
