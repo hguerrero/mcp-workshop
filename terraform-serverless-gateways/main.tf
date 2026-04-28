@@ -47,3 +47,30 @@ resource "konnect_identity_auth_server_client" "student_application" {
   client_secret  = "supersecret"
   id             = "${var.student_name_prefix}${each.key}"
 }
+
+resource "konnect_system_account_access_token" "token" {
+  account_id = var.system_account_id
+  expires_at = timeadd(timestamp(), "8760h")
+  name       = "workshop-access-token"
+}
+
+# Config Store per student
+resource "konnect_gateway_config_store" "student_config_store" {
+  for_each = toset(local.student_ids)
+
+  control_plane_id = konnect_gateway_control_plane.serverless_cp[each.key].id
+  name             = "${var.student_name_prefix}${each.key}-config-store"
+}
+
+# Vault per student using Konnect Config Store
+resource "konnect_gateway_vault" "student_vault" {
+  for_each = toset(local.student_ids)
+
+  control_plane_id = konnect_gateway_control_plane.serverless_cp[each.key].id
+  name             = "konnect"
+  prefix           = "ai"
+  description      = "Konnect config store vault for ${var.student_name_prefix}${each.key}"
+  config = jsonencode({
+    config_store_id = konnect_gateway_config_store.student_config_store[each.key].id
+  })
+}

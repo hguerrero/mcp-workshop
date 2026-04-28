@@ -3,6 +3,9 @@
 # Required - Get from Konnect UI: Personal Access Token
 # konnect_personal_access_token = "REPLACE_ME"
 
+# Required - System Account ID for access token creation
+# system_account_id = "REPLACE_ME"
+
 # Number of students to provision (default: 5)
 student_count = 5
 

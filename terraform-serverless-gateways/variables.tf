@@ -30,3 +30,8 @@ variable "control_plane_description" {
   type        = string
   default     = "Serverless gateway for workshop student"
 }
+
+variable "system_account_id" {
+  description = "System account ID for creating access token"
+  type        = string
+}

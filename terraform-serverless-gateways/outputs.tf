@@ -41,3 +41,23 @@ output "application_client_secrets" {
     for student_id in local.student_ids : student_id => konnect_identity_auth_server_client.student_application[student_id].client_secret
   }
 }
+
+output "system_account_access_token" {
+  description = "The generated system account access token"
+  sensitive   = true
+  value       = konnect_system_account_access_token.token.token
+}
+
+output "vault_ids" {
+  description = "Map of student IDs to their vault IDs"
+  value = {
+    for student_id in local.student_ids : student_id => konnect_gateway_vault.student_vault[student_id].id
+  }
+}
+
+output "config_store_ids" {
+  description = "Map of student IDs to their config store IDs"
+  value = {
+    for student_id in local.student_ids : student_id => konnect_gateway_config_store.student_config_store[student_id].id
+  }
+}
