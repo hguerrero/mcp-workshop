@@ -1,0 +1,131 @@
+openapi: 3.0.0
+info:
+  title: Sample Users API
+  version: 1.1.0
+  description: A sample API for managing users and orders in a mock marketplace.
+servers:
+  - url: http://localhost:3000
+    description: Local development server
+paths:
+  /users:
+    get:
+      summary: Get all users
+      operationId: getUsers
+      parameters:
+        - name: id
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Optional user ID to filter results
+      responses:
+        "200":
+          description: A list of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+              example:
+                - id: "1"
+                  username: alice
+                  email: alice@example.com
+                - id: "2"
+                  username: bob
+                  email: bob@example.com
+                - id: "3"
+                  username: carol
+                  email: carol@example.com
+  /orders:
+    get:
+      summary: Get orders for a user
+      operationId: getOrders
+      parameters:
+        - name: userid
+          in: query
+          required: true
+          schema:
+            type: string
+          description: User ID to filter orders
+      responses:
+        "200":
+          description: A list of orders for the given user
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Order"
+              example:
+                - id: "101"
+                  userid: "1"
+                  product: Widget A
+                  quantity: 2
+                  status: shipped
+                - id: "102"
+                  userid: "1"
+                  product: Widget B
+                  quantity: 1
+                  status: pending
+                - id: "103"
+                  userid: "2"
+                  product: Gadget X
+                  quantity: 5
+                  status: delivered
+components:
+  schemas:
+    User:
+      type: object
+      required:
+        - id
+        - username
+        - email
+      properties:
+        id:
+          type: string
+          description: Unique user identifier
+          example: "1"
+        username:
+          type: string
+          description: The user's display name
+          example: alice
+        email:
+          type: string
+          format: email
+          description: The user's email address
+          example: alice@example.com
+    Order:
+      type: object
+      required:
+        - id
+        - userid
+        - product
+        - quantity
+        - status
+      properties:
+        id:
+          type: string
+          description: Unique order identifier
+          example: "101"
+        userid:
+          type: string
+          description: ID of the user who placed the order
+          example: "1"
+        product:
+          type: string
+          description: Name of the ordered product
+          example: Widget A
+        quantity:
+          type: integer
+          description: Number of units ordered
+          example: 2
+        status:
+          type: string
+          description: Current order status
+          enum:
+            - pending
+            - shipped
+            - delivered
+            - cancelled
+          example: shipped

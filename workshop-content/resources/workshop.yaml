@@ -1,0 +1,50 @@
+apiVersion: training.educates.dev/v1beta1
+kind: Workshop
+metadata:
+  name: lab-kong-mcp-workshop
+spec:
+  title: "Kong MCP Workshop"
+  description: >
+    A hands-on lab exploring Kong's AI MCP Proxy Plugin. Learn how to auto-generate
+    an MCP server at the data plane, configure MCP tools, and connect AI clients
+    to your Kong-managed APIs.
+  url: https://github.com/hguerrero/mcp-workshop
+  difficulty: beginner
+  duration: 50m
+  vendor: konghq.com
+  tags:
+    - workshop
+    - MCP
+    - Konnect
+  authors:
+    - Technical Product Marketing
+  publish:
+    image: $(image_repository)/lab-kong-mcp-workshop-files:$(workshop_version)
+  workshop:
+    files:
+    - image:
+        url: $(image_repository)/lab-kong-mcp-workshop-files:$(workshop_version)
+      includePaths:
+      - /workshop/**
+      - /exercises/**
+      - /README.md
+  session:
+    namespaces:
+      budget: small
+    applications:
+      workshop:
+        layout: tab
+      terminal:
+        enabled: false
+    #   console:
+    #     enabled: false
+    #   editor:
+    #     enabled: true
+    # dashboards:
+    #   - name: Konnect
+    #     url: https://cloud.konghq.com/login/xxx
+    #   - name: Kong
+    #     url: https://www.konghq.com
+    env:
+    - name: PROXY
+      value: ""

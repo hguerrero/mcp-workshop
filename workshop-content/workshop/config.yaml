@@ -1,0 +1,30 @@
+pathways:
+  default: workshop
+
+  paths:
+    workshop:
+      title: "Kong MCP Workshop"
+      steps:
+      - 00-workshop-overview
+      - 01-create-gateway-service
+      - 02-add-marketplace-route
+      - 03-configure-mocking-plugin
+      - 04-create-mcp-proxy
+      - 05-connect-mcp-client
+      - 06-workshop-summary
+
+modules:
+- name: 00-workshop-overview
+  title: "Workshop Overview"
+- name: 01-create-gateway-service
+  title: "Prep: Create a Gateway Service"
+- name: 02-add-marketplace-route
+  title: "Prep: Add a Marketplace Route"
+- name: 03-configure-mocking-plugin
+  title: "Prep: Configure the Mocking Plugin"
+- name: 04-create-mcp-proxy
+  title: "Setup: Create the MCP Proxy Plugin"
+- name: 05-connect-mcp-client
+  title: "Testing: Connect an MCP Client"
+- name: 06-workshop-summary
+  title: "Workshop Summary"
