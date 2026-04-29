@@ -66,21 +66,40 @@ Each lab specifies its own prerequisites in the Workshop Overview page. The comm
 
 ### For Instructors
 
-Use the Terraform module in [`terraform-serverless-gateways/`](terraform-serverless-gateways/) to provision one isolated environment per student. Each environment includes:
+Before running a session you need to provision one isolated Konnect environment per student. The [`terraform-serverless-gateways/`](terraform-serverless-gateways/) module handles this. Each student environment includes a Konnect Serverless Gateway, a Kong Identity auth server and pre-registered client application, and a Konnect Config Store and Vault (prefix `ai`) for upstream secret injection.
 
-- A Konnect Serverless Gateway (control plane + data plane on AWS `us`)
-- A Kong Identity auth server and pre-registered client application
-- A Konnect Config Store and Vault (prefix `ai`) for secret injection
+**Quick start:**
 
-See the [Terraform README](terraform-serverless-gateways/README.md) for full provisioning instructions.
+```bash
+cd terraform-serverless-gateways
+cp terraform.tfvars.example terraform.tfvars
+# Edit terraform.tfvars — set konnect_personal_access_token, system_account_id, and student_count
+terraform init
+terraform plan
+terraform apply
+```
+
+After `apply`, extract the per-student values to distribute:
+
+```bash
+terraform output serverless_gateway_urls   # → $PROXY per student
+terraform output auth_server_urls          # → $KONG_IDENTITY_ISSUER per student
+terraform output application_client_ids    # → $KONG_MCP_CLIENT_ID per student
+```
+
+See the [Terraform README](terraform-serverless-gateways/README.md) for the full variable reference, output descriptions, and teardown instructions.
+
+> **Note:** Terraform provisions the **Konnect infrastructure** (gateways, auth servers, vaults). The workshop instructions themselves — the step-by-step lab content students follow — are delivered via the Educates platform. See the next section for how to publish and deploy those.
 
 ---
 
-## Deploying a Workshop
+## Publishing & Deploying the Workshop Content
 
-Each lab is a standalone Educates workshop published as an OCI image.
+> These steps are for publishing the **lab instructions** to an Educates cluster. They are separate from the Konnect infrastructure provisioned by Terraform above.
 
-### Publish (build & push the workshop image)
+Each lab is a standalone Educates workshop packaged as an OCI image. You need to publish the image before students can access the lab content.
+
+### 1. Publish (build & push the workshop image)
 
 ```bash
 educates publish-workshop --name lab-mcp-conversion   # Lab 1
@@ -88,7 +107,7 @@ educates publish-workshop --name lab-mcp-passthrough  # Lab 2
 educates publish-workshop --name lab-mcp-registry     # Lab 3
 ```
 
-### Deploy to a cluster
+### 2. Deploy to a cluster
 
 ```bash
 educates deploy-workshop --file lab1-conversion-listener/resources/workshop.yaml
