@@ -3,7 +3,7 @@ pathways:
 
   paths:
     workshop:
-      title: "Kong MCP Workshop"
+      title: "Kong MCP — Conversion Listener"
       steps:
       - 00-workshop-overview
       - 01-create-gateway-service

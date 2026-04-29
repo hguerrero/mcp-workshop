@@ -1,0 +1,34 @@
+apiVersion: training.educates.dev/v1beta1
+kind: Workshop
+metadata:
+  name: lab-mcp-passthrough
+spec:
+  title: "Kong MCP — Passthrough + Auth"
+  description: >
+    Front an existing MCP server with Kong Gateway using passthrough-listener mode,
+    OAuth2/PKCE validation via Kong Identity, and upstream token injection from
+    Konnect Vault. Covers VSCode, Cursor, and Claude Code IDE integration.
+  publish:
+    image: $(image_repository)/lab-mcp-passthrough-files:$(workshop_version)
+  workshop:
+    files:
+    - image:
+        url: $(image_repository)/lab-mcp-passthrough-files:$(workshop_version)
+      includePaths:
+      - /workshop/**
+      - /README.md
+  session:
+    namespaces:
+      budget: small
+    applications:
+      console:
+        enabled: true
+      editor:
+        enabled: true
+    env:
+    - name: PROXY
+      value: ""
+    - name: KONG_IDENTITY_ISSUER
+      value: ""
+    - name: KONG_MCP_CLIENT_ID
+      value: ""

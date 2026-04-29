@@ -2,7 +2,7 @@
 title: "Prep: Create a Gateway Service"
 ---
 
-# MCP Prep-work — Create a Gateway Service
+# Create a Gateway Service
 
 Before configuring the MCP Proxy Plugin you need a **Gateway Service** and a **Route** for the Marketplace API. In this step you will create the service. The route is added in the next step.
 

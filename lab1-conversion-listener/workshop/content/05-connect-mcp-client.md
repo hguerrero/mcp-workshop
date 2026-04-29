@@ -2,7 +2,7 @@
 title: "Testing: Connect an MCP Client"
 ---
 
-# MCP Testing — Connect an MCP Client
+# Connect an MCP Client
 
 Your Kong route is now a fully functional MCP server. In this step you will point an MCP-capable client at it and invoke the tools you configured.
 

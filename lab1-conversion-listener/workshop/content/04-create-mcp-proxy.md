@@ -2,7 +2,7 @@
 title: "Setup: Create the MCP Proxy Plugin"
 ---
 
-# MCP Setup — Create the MCP Proxy Plugin
+# Create the MCP Proxy Plugin
 
 The **AI MCP Proxy Plugin** is the core of this workshop. It exposes Kong-managed API endpoints as **MCP Tools**, allowing AI clients to discover and invoke them using the Model Context Protocol.
 

@@ -1,0 +1,27 @@
+pathways:
+  default: workshop
+
+  paths:
+    workshop:
+      title: "Kong MCP — Registry & Governance"
+      steps:
+      - 00-workshop-overview
+      - 01-create-registry
+      - 02-publish-server-entry
+      - 03-expose-registry-via-kong
+      - 04-point-ide-at-registry
+      - 05-workshop-summary
+
+modules:
+- name: 00-workshop-overview
+  title: "Workshop Overview"
+- name: 01-create-registry
+  title: "Create the Registry"
+- name: 02-publish-server-entry
+  title: "Publish a Server Entry"
+- name: 03-expose-registry-via-kong
+  title: "Expose the Registry via Kong"
+- name: 04-point-ide-at-registry
+  title: "Point IDE Clients at the Registry"
+- name: 05-workshop-summary
+  title: "Workshop Summary"

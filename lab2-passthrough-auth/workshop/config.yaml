@@ -1,0 +1,30 @@
+pathways:
+  default: workshop
+
+  paths:
+    workshop:
+      title: "Kong MCP — Passthrough + Auth"
+      steps:
+      - 00-workshop-overview
+      - 01-passthrough-service-route
+      - 02-passthrough-mcp-proxy
+      - 03-request-transformer
+      - 04-configure-oauth2
+      - 05-connect-ide-clients
+      - 06-workshop-summary
+
+modules:
+- name: 00-workshop-overview
+  title: "Workshop Overview"
+- name: 01-passthrough-service-route
+  title: "Create Service & Route"
+- name: 02-passthrough-mcp-proxy
+  title: "Step 1: Add MCP Proxy (Passthrough)"
+- name: 03-request-transformer
+  title: "Step 2: Inject the Upstream Token"
+- name: 04-configure-oauth2
+  title: "Step 3: Configure OAuth2 Validation"
+- name: 05-connect-ide-clients
+  title: "Testing: Connect IDE Clients"
+- name: 06-workshop-summary
+  title: "Workshop Summary"

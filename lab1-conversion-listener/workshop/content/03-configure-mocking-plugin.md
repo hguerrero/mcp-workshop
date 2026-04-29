@@ -2,7 +2,7 @@
 title: "Prep: Configure the Mocking Plugin"
 ---
 
-# MCP Prep-work — Configure the Mocking Plugin
+# Configure the Mocking Plugin
 
 The **Mocking Plugin** intercepts requests and returns synthetic responses based on an OpenAPI specification. This lets you work with a realistic Marketplace API without needing a live backend.
 

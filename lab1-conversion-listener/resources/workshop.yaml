@@ -1,0 +1,31 @@
+apiVersion: training.educates.dev/v1beta1
+kind: Workshop
+metadata:
+  name: lab-mcp-conversion
+spec:
+  title: "Kong MCP — Conversion Listener"
+  description: >
+    Turn any REST API into an MCP server using Kong's AI MCP Proxy Plugin in
+    conversion-listener mode. No upstream changes required. Includes a Mocking
+    Plugin to simulate a Marketplace API with users and orders tools.
+  publish:
+    image: $(image_repository)/lab-mcp-conversion-files:$(workshop_version)
+  workshop:
+    files:
+    - image:
+        url: $(image_repository)/lab-mcp-conversion-files:$(workshop_version)
+      includePaths:
+      - /workshop/**
+      - /exercises/**
+      - /README.md
+  session:
+    namespaces:
+      budget: small
+    applications:
+      console:
+        enabled: true
+      editor:
+        enabled: true
+    env:
+    - name: PROXY
+      value: ""

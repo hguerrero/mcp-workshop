@@ -2,7 +2,7 @@
 title: "Prep: Add a Marketplace Route"
 ---
 
-# MCP Prep-work — Add a Marketplace Route
+# Add a Marketplace Route
 
 With the Gateway Service created, you now need a **Route** to expose it. The route defines which incoming requests are forwarded to the service.
 
