@@ -1,0 +1,84 @@
+_format_version: "3.0"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Kong MCP Workshop — Lab 2: Passthrough + Auth
+#
+# Upstream:  Konnect MCP Server (us.mcp.konghq.com)
+# Auth:      Kong Identity (pre-provisioned per workshop environment)
+# Secrets:   Stored in Konnect Vault — prefix "ai"
+#
+# Before syncing, replace the following placeholders:
+#   $KONG_IDENTITY_ISSUER   — OIDC issuer URL of the provisioned Kong Identity
+#                             auth server, e.g. https://<cp>.us.auth.konghq.com/oauth2/default
+#   $KONG_PROXY_HOST        — Public hostname of your Kong Gateway proxy,
+#                             e.g. kong-abc123.konghq.com
+#
+# Vault secrets (pre-provisioned, do not change names):
+#   {vault://ai/konnect-mcp-spat}  — Full "Authorization: Bearer spat_..." header
+#                                    for the workshop system account
+# ─────────────────────────────────────────────────────────────────────────────
+
+services:
+  - name: konnect-mcp-server
+    url: https://us.mcp.konghq.com
+    tags:
+      - mcp
+    routes:
+      - name: konnect-mcp-server
+        tags:
+          - mcp
+        paths:
+          - /konnect-mcp-server
+          - /.well-known/oauth-protected-resource/konnect-mcp-server
+        strip_path: true
+        preserve_host: false
+        request_buffering: false
+        response_buffering: false
+        plugins:
+          # ── Step 1: MCP Protocol Relay ────────────────────────────────────
+          # Passthrough mode — Kong relays MCP traffic to the upstream as-is.
+          # Use conversion-listener when exposing a REST API as MCP (see Lab 1).
+          - name: ai-mcp-proxy
+            instance_name: konnect-mcp-proxy
+            enabled: true
+            tags:
+              - mcp
+            config:
+              mode: passthrough-listener
+              logging:
+                log_payloads: true
+                log_statistics: true
+
+          # ── Step 2: Upstream Credential Injection ─────────────────────────
+          # Replaces any incoming Authorization header with the system account
+          # PAT stored in Vault. Clients never see or handle the upstream token.
+          - name: request-transformer-advanced
+            instance_name: konnect-mcp-transformer
+            enabled: true
+            tags:
+              - mcp
+            config:
+              add:
+                headers:
+                  - "{vault://ai/konnect-mcp-spat}"
+
+          # ── Step 3: Client Authentication ─────────────────────────────────
+          # Validates developer JWTs issued by Kong Identity via JWKS.
+          # Also serves OAuth Protected Resource Metadata for IDE auto-discovery.
+          - name: ai-mcp-oauth2
+            instance_name: konnect-mcp-oauth2
+            enabled: true
+            tags:
+              - mcp
+            config:
+              authorization_servers:
+                - $KONG_IDENTITY_ISSUER
+              jwks_endpoint: $KONG_IDENTITY_ISSUER/.well-known/jwks.json
+              jwks_cache_ttl: 60
+              # Kong Identity issues tokens with aud=client_id (not resource URI).
+              # Relaxed validation skips strict aud matching; identity comes from sub.
+              insecure_relaxed_audience_validation: true
+              scopes_supported:
+                - openid
+              metadata_endpoint: /.well-known/oauth-protected-resource/konnect-mcp-server
+              resource: https://$KONG_PROXY_HOST/konnect-mcp-server
