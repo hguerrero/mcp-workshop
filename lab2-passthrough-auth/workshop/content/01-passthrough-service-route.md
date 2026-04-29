@@ -18,6 +18,8 @@ Fill in the following:
 | **Name** | `konnect-mcp-server` |
 | **Tags** | `mcp` |
 
+![New Gateway Service form — URL set to us.mcp.konghq.com, name konnect-mcp-server]({{<baseurl>}}/images/konnect-mcp-service.png)
+
 Click **Save**. Stay on the service screen.
 
 > This is a real upstream — the Konnect MCP Server. Unlike Lab 1, there is no Mocking Plugin here.
@@ -27,6 +29,8 @@ Click **Save**. Stay on the service screen.
 ## Step 2 — Create the Route
 
 From the `konnect-mcp-server` service screen, click **Add a Route**.
+
+![Service detail screen — "Add a Route" button highlighted]({{<baseurl>}}/images/konnect-add-route.png)
 
 Fill in the **General Information**:
 
@@ -48,6 +52,8 @@ Add both of these paths (click **+ Add Path** after the first):
 
 > **Why two paths?** The second path (`/.well-known/...`) is where Kong publishes the **OAuth Protected Resource Metadata** — the discovery document that tells IDE clients which authorization server to use. IDE MCP clients follow this standard automatically when they receive a `401` with a `WWW-Authenticate: Bearer resource_metadata=...` header.
 
+![Advanced route config — both paths entered, Strip Path enabled]({{<baseurl>}}/images/konnect-advance-route.png)
+
 ### Route Configuration
 
 Set the following options:
@@ -61,7 +67,11 @@ Set the following options:
 
 > **Buffering must be off.** MCP uses Server-Sent Events (SSE) for streaming responses. Buffering breaks SSE by waiting for the full response before forwarding it to the client.
 
+![Advanced route config scrolled — Request Buffering and Response Buffering unchecked]({{<baseurl>}}/images/konnect-advanced-route-2.png)
+
 Click **Save**.
+
+![konnect-mcp-server service with the route confirmed]({{<baseurl>}}/images/konnect-route-successful-mcp.png)
 
 ---
 

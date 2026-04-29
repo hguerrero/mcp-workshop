@@ -87,6 +87,12 @@ Select **Request Transformer Advanced** and configure:
 {vault://ai/konnect-mcp-registry-pat}
 ```
 
+> **How was the vault secret stored?** The `konnect-mcp-registry-pat` secret is pre-provisioned in the `ai` vault. If you ever need to store a new secret, navigate to **Konnect Vault → ai → Store New Secret** and fill in the key and value fields:
+
+![Vault detail — "Store New Secret" button]({{<baseurl>}}/images/konnect-new-secret.png)
+
+![New Secret form — key "konnect-mcp-spat", value is the full "Authorization: Bearer ..." string]({{<baseurl>}}/images/konnect-new-secret-details.png)
+
 **Add → Query String:**
 ```
 version:latest

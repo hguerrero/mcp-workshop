@@ -38,6 +38,8 @@ From the `konnect-mcp-server` Route → **Plugins** tab → **+ New plugin**.
 
 Type `request transformer` in the filter. Click the **Request Transformer Advanced** tile.
 
+![Plugin Catalog filtered by "transformer advanced"]({{<baseurl>}}/images/konnect-plugin-transformer.png)
+
 **3. Configure the Plugin**
 
 Expand the **Add** section and locate the **Headers** sub-section. Click **+ Add header** and enter:
@@ -45,6 +47,8 @@ Expand the **Add** section and locate the **Headers** sub-section. Click **+ Add
 ```
 {vault://ai/konnect-mcp-spat}
 ```
+
+![Request Transformer Advanced — instance name "add-auth-header", Add.Headers set to vault reference]({{<baseurl>}}/images/konnect-add-auth-header.png)
 
 > This single entry is the entire `Authorization: Bearer spat_...` header, resolved from Vault at request time.
 

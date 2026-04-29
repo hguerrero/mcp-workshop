@@ -26,7 +26,29 @@ Both values are provided by your instructor.
 
 ---
 
-## Option A — VSCode
+## Option A — Insomnia
+
+Insomnia supports OAuth2 MCP connections directly from the MCP client UI.
+
+1. Open Insomnia and create a new **MCP Collection** named `Konnect MCP`
+
+![Insomnia — creating a new MCP Client named "Konnect MCP"]({{<baseurl>}}/images/insomnia-konnect-mcp.png)
+
+2. Enter the server URL: `$PROXY/konnect-mcp-server` and click **Connect**
+3. Insomnia detects the `401` and opens the MCP Authentication Confirmation dialog
+
+![Insomnia MCP Authentication Confirmation — OAuth2 flow dialog]({{<baseurl>}}/images/insomnia-mcp-auth.png)
+
+4. Complete the OAuth2 flow in the browser tab that opens — log in with your workshop credentials
+5. On success, Insomnia shows the available MCP tools from the Konnect MCP Server
+
+> **Auth error?** If you see `MCPAuthError` or a Disconnected status, ensure the client ID is set correctly and the callback port matches what Kong Identity expects.
+
+![Insomnia MCPAuthError — disconnected state, shown here for troubleshooting reference]({{<baseurl>}}/images/insomnia-mcp-auth-error.png)
+
+---
+
+## Option B — VSCode
 
 ### Configuration
 
@@ -60,7 +82,7 @@ Replace `$PROXY` with your actual Proxy URL.
 
 ---
 
-## Option B — Cursor
+## Option C — Cursor
 
 Cursor uses `mcp-remote` (a Node.js stdio-to-HTTP bridge) for reliable OAuth support with remote MCP servers.
 
@@ -102,7 +124,7 @@ To force re-authentication: `rm -rf ~/.mcp-auth` and toggle the server off/on.
 
 ---
 
-## Option C — Claude Code
+## Option D — Claude Code
 
 Claude Code handles OAuth2/PKCE natively — no `mcp-remote` bridge needed.
 

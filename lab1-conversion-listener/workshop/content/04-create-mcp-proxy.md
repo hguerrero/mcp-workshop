@@ -30,9 +30,13 @@ From the `Marketplace-MCP-Route` detail screen:
 3. In the filter field type `mcp proxy`
 4. Click the **"AI MCP Proxy"** tile
 
+![Plugin Catalog filtered by "mcp" showing the AI MCP Proxy tile]({{<baseurl>}}/images/konnect-mcp-search.png)
+
 ## Step 2 — Select the Mode
 
 In the **Mode** dropdown, select **`conversion-listener`**.
+
+![AI MCP Proxy plugin config — mode set to conversion-listener, scoped to Marketplace-MCP-Route]({{<baseurl>}}/images/konnect-mcp-proxy-details-1.png)
 
 ## Step 3 — Configure Tool #1: marketplace-users
 
@@ -44,6 +48,8 @@ Click the **"+"** icon next to the **Tools** section to add the first tool.
 |---|---|
 | **Name** | `marketplace-users` |
 | **Description** | `Gets marketplace users` |
+
+![Tool #1 — name and description fields filled in]({{<baseurl>}}/images/konnect-mcp-proxy-details-2.png)
 
 ### Tool #1 Parameters
 
@@ -77,6 +83,8 @@ In the **Annotations** section, set:
 | Field | Value |
 |---|---|
 | **Title** | `Marketplace Users` |
+
+![Tool #1 — path=/marketplace/users, method=GET, title=Marketplace Users]({{<baseurl>}}/images/konnect-mcp-proxy-details-3.png)
 
 ---
 
@@ -142,12 +150,16 @@ In the **Logging** section:
 |---|---|
 | **Log statistics** | ✅ Checked |
 
+![Logging section — statistics, payloads, and audits checked]({{<baseurl>}}/images/konnect-mcp-proxy-details-4.png)
+
 Click **"Show additional settings"** and fill in:
 
 | Field | Value |
 |---|---|
 | **Instance Name** | `Marketplace-MCP-Proxy` |
 | **Tags** | `mcp` |
+
+![Instance name set to "marketplace-mcp-proxy" — Save button visible]({{<baseurl>}}/images/konnect-mcp-proxy-details-5.png)
 
 Click the **"Save"** button.
 

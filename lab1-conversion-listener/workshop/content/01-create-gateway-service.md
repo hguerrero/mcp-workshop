@@ -18,6 +18,8 @@ Log in to [cloud.konghq.com](https://cloud.konghq.com) and open your assigned Co
 
 Then select **"Add a Service"** or **"+ New Service"** from the top-right corner.
 
+![Konnect Gateway overview with "Add a service and route" call-to-action]({{<baseurl>}}/images/konnect-add-service.png)
+
 **3. Fill in the Service Endpoint**
 
 In the **Full URL** field enter:
@@ -37,11 +39,17 @@ https://httpbin.konghq.com
 
 Click **"Add tags"** to reveal the Tags field before filling it in.
 
+![Configure New API modal — service URL and route fields]({{<baseurl>}}/images/konnect-service-route-details.png)
+
 **5. Save the Service**
 
 Click the **"Save"** button. You will be taken to the main screen for the `Marketplace-MCP-Service` service.
 
+![Gateway Services list confirming Marketplace-MCP-Service was created]({{<baseurl>}}/images/konnect-new-service.png)
+
 > **Stay on this screen!** You will add a Route from here in the next step.
+
+![Gateway is ready — proxy URL confirmation modal]({{<baseurl>}}/images/konnect-gateway-ready.png)
 
 ## Checkpoint ✅
 

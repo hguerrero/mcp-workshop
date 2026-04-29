@@ -20,6 +20,8 @@ From the `konnect-mcp-server` Route → **Plugins** tab → **+ New plugin**.
 
 Type `mcp oauth` in the filter. Click the **AI MCP OAuth2** tile.
 
+![Plugin Catalog filtered by "mcp" — AI MCP OAuth2 tile highlighted]({{<baseurl>}}/images/konnect-new-plugin-oauth.png)
+
 **3. Configure Authorization Server**
 
 In the **Authorization Servers** field, add:

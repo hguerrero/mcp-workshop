@@ -12,12 +12,19 @@ From the `Marketplace-MCP-Route` detail screen:
 
 1. Click the **Plugins** tab
 2. Click **"+ New plugin"**
+
+![Empty Plugins tab — click "+ New plugin" to open the catalog]({{<baseurl>}}/images/konnect-new-plugin.png)
+
 3. In the filter field type `mocking`
 4. Click the **"Mocking"** tile to open the plugin configuration form
+
+![Plugin Catalog filtered by "mocking"]({{<baseurl>}}/images/konnect-mock-plugin.png)
 
 ## Step 2 — Paste the OpenAPI Specification
 
 In the **API Specification** field, paste the entire contents of the `marketplace.yaml` file from the `exercises/` folder (open it in the editor panel on the left).
+
+![Mocking plugin config — scoped to Marketplace-MCP-Route, API spec paste area]({{<baseurl>}}/images/konnect-mock-details-1.png)
 
 The specification defines two resources:
 - `GET /users` — returns a list of marketplace users (optionally filtered by `id`)
@@ -132,7 +139,11 @@ After pasting the spec, configure these additional fields:
 | **Tags** | `mcp` |
 | **Custom Base Path** | `/marketplace` |
 
+![Mocking plugin — instance name "marketplace-api-mock" and base path "/marketplace"]({{<baseurl>}}/images/konnect-mock-details-2.png)
+
 Click the **"Save"** button.
+
+![Plugins list confirming the Mocking plugin is enabled on the route]({{<baseurl>}}/images/konnect-add-mcp-proxy.png)
 
 ## Step 4 — Validate the Mock Endpoint
 

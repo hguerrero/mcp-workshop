@@ -16,6 +16,12 @@ By the end of this workshop you will be able to:
 4. **Define typed MCP tools** with parameters that map to upstream HTTP endpoints
 5. **Connect an MCP client** (Insomnia, Cursor, or Antigravity) and invoke the tools
 
+## Kong Gateway: Extend with Plugins
+
+Kong's plugin system is central to everything you'll do in this workshop. The gateway overview shows the "Extend with plugins" entry point for every service and route:
+
+![Konnect gateway overview — "Extend with plugins" call-to-action]({{<baseurl>}}/images/konnect-plguins.png)
+
 ## How Conversion Listener Works
 
 In `conversion-listener` mode, **Kong itself becomes the MCP server**. The upstream only needs to speak HTTP — no MCP support required.
@@ -42,6 +48,10 @@ Before you begin, make sure you have:
 - Access to your assigned **Konnect Control Plane** — URL and credentials provided by your instructor
 - An MCP-capable client installed: [Insomnia](https://insomnia.rest/), [Cursor](https://cursor.sh/), or [Google Antigravity](https://developers.google.com/gemini)
 - The **`exercises/marketplace.yaml`** file open in the editor panel — you will paste its contents during the Mocking Plugin step
+
+Your instructor has pre-provisioned one Serverless Gateway Control Plane per student. The Gateway Manager view looks like this:
+
+![Konnect Gateway Manager showing per-student Control Planes]({{<baseurl>}}/images/konnect-cps.png)
 
 > **`$PROXY`** — throughout this workshop, `$PROXY` refers to the Proxy URL shown on your Konnect Gateway Service screen. Copy it once it appears and keep it handy.
 

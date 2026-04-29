@@ -18,15 +18,21 @@ Configuring the MCP Proxy first establishes that the route *speaks MCP*. The rou
 
 From the `konnect-mcp-server` **Route** screen (not the Service), click the **Plugins** tab, then **+ New plugin**.
 
+![Route Plugins tab — empty state, click "+ New plugin"]({{<baseurl>}}/images/konnect-route-new-plugin.png)
+
 **2. Find the AI MCP Proxy Plugin**
 
 In the plugin filter, type `mcp proxy`. Click the **AI MCP Proxy** tile.
+
+![Plugin Catalog filtered by "mcp" — AI MCP Proxy tile]({{<baseurl>}}/images/konnect-mcp-search.png)
 
 **3. Configure the Plugin**
 
 | Field | Value |
 |---|---|
 | **Mode** | `passthrough-listener` |
+
+![AI MCP Proxy plugin config — mode set to passthrough-listener]({{<baseurl>}}/images/konnect-mcp-proxy-details-passthrough.png)
 
 In the **Logging** section:
 

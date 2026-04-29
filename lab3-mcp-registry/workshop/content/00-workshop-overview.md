@@ -59,6 +59,8 @@ Before you begin, make sure you have:
 - The following resource is **pre-provisioned** in your control plane:
   - Konnect Vault `ai` with secret `konnect-mcp-registry-pat` (read-only registry viewer PAT)
 
+![Konnect Vaults page — showing the pre-provisioned "ai" vault]({{<baseurl>}}/images/konnect-vaults.png)
+
 > **Background:** This workshop uses the `$PROXY/konnect-mcp-server` endpoint built in Workshop 2 as the server entry to publish. If you haven't done Workshop 2, your instructor will provide the URL to use instead.
 
 > **Tech preview:** The Konnect MCP Registry feature is currently in Labs / tech preview. Confirm with your instructor that it is enabled on your Konnect organization.

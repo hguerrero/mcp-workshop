@@ -21,15 +21,31 @@ $PROXY/marketplace
 Insomnia supports MCP natively through its **MCP Server Manager**.
 
 1. Open Insomnia and create a new **MCP Collection**
-2. Click the **MCP Server Manager** icon in the sidebar
+
+![Insomnia Create menu — select MCP Client]({{<baseurl>}}/images/insomnia-create-mcp.png)
+
+2. Give it a name (e.g., `Marketplace MCP`) in the dialog that appears
+
+![Insomnia new MCP name dialog]({{<baseurl>}}/images/insomnia-new-mcp.png)
+
 3. Click **"Add server"** and enter the URL:
    ```
    $PROXY/marketplace
    ```
+   Then click **Connect**
+
+![Insomnia MCP server — URL entered, Connect button]({{<baseurl>}}/images/insomnia-mcp-connect.png)
+
 4. Once connected, the tool list will show:
    - `marketplace-orders` — *Gets marketplace orders*
    - `marketplace-users` — *Gets marketplace users*
+
+![Insomnia MCP successfully connected — tools list visible]({{<baseurl>}}/images/insomnia-mcp-successful.png)
+
 5. Select `marketplace-users` and click **"Call Tool"** — you should receive a list of users
+
+![Insomnia marketplace-users tool call returning REST 200 OK]({{<baseurl>}}/images/insomnia-marketplace-users.png)
+
 6. Select `marketplace-orders`, provide a `userid` (e.g., `1`), and click **"Call Tool"**
 
 ---
