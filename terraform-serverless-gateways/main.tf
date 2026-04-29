@@ -44,6 +44,7 @@ resource "konnect_identity_auth_server_client" "student_application" {
   auth_server_id = konnect_identity_auth_server.student_auth_server[each.key].id
   grant_types    = ["client_credentials"]
   response_types = ["token"]
+  redirect_uris  = ["https://httpbin.konghq.com", "https://app.insomnia.rest/oauth/redirect"]
   client_secret  = "supersecret"
   id             = "${var.student_name_prefix}${each.key}"
 }

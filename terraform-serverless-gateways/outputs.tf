@@ -27,6 +27,13 @@ output "auth_server_ids" {
   }
 }
 
+output "auth_server_urls" {
+  description = "Map of student IDs to their identity auth server issuer URLs"
+  value = {
+    for student_id in local.student_ids : student_id => konnect_identity_auth_server.student_auth_server[student_id].issuer
+  }
+}
+
 output "application_client_ids" {
   description = "Map of student IDs to their identity auth server client IDs"
   value = {
