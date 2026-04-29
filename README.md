@@ -24,32 +24,33 @@ kong--mcp-workshop/
 │   ├── resources/workshop.yaml       # Educates Workshop CRD
 │   └── workshop/
 │       ├── config.yaml               # Hugo pathway & nav
-│       └── content/                  # Markdown pages (00–06)
+│       ├── content/                  # Markdown pages (00–06)
+│       └── static/images/            # Screenshot assets for Lab 1
 │
 ├── lab2-passthrough-auth/
 │   ├── resources/workshop.yaml
 │   └── workshop/
 │       ├── config.yaml
-│       └── content/                  # Markdown pages (00–06)
+│       ├── content/                  # Markdown pages (00–06)
+│       └── static/images/            # Screenshot assets for Lab 2
 │
 ├── lab3-mcp-registry/
 │   ├── resources/workshop.yaml
 │   └── workshop/
 │       ├── config.yaml
-│       └── content/                  # Markdown pages (00–05)
+│       ├── content/                  # Markdown pages (00–05)
+│       └── static/images/            # Screenshot assets for Lab 3
 │
 ├── decK/
 │   └── konnect-mcp/
 │       └── config.yaml               # Declarative Kong config for Lab 2 (passthrough + auth)
 │
-├── terraform-serverless-gateways/    # Instructor: provision per-student environments
-│   ├── main.tf
-│   ├── variables.tf
-│   ├── outputs.tf
-│   ├── provider.tf
-│   └── terraform.tfvars.example
-│
-└── *.png                             # Screenshot assets used in workshop content
+└── terraform-serverless-gateways/    # Instructor: provision per-student environments
+    ├── main.tf
+    ├── variables.tf
+    ├── outputs.tf
+    ├── provider.tf
+    └── terraform.tfvars.example
 ```
 
 ---
@@ -97,34 +98,83 @@ See the [Terraform README](terraform-serverless-gateways/README.md) for the full
 
 > These steps are for publishing the **lab instructions** to an Educates cluster. They are separate from the Konnect infrastructure provisioned by Terraform above.
 
-Each lab is a standalone Educates workshop packaged as an OCI image. You need to publish the image before students can access the lab content.
+### Local Development
 
-### 1. Publish (build & push the workshop image)
+You can run the full Educates workshop stack on your laptop using a local Kind cluster. This lets you preview and iterate on content without pushing to a remote registry or cluster.
+
+#### Prerequisites
+
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) (or equivalent container runtime)
+- [Educates CLI](https://docs.educates.dev/en/stable/installation-guides/cli-based-installation.html) — install via the GitHub releases page
+
+#### 1. Create the local cluster
+
+This spins up a Kind-based Kubernetes cluster and deploys Educates, including a local image registry at `localhost:5001`:
 
 ```bash
-educates publish-workshop --name lab-mcp-conversion   # Lab 1
-educates publish-workshop --name lab-mcp-passthrough  # Lab 2
-educates publish-workshop --name lab-mcp-registry     # Lab 3
+educates create-cluster --domain 127-0-0-1.sslip.io
 ```
 
-### 2. Deploy to a cluster
+> The cluster uses a `sslip.io` wildcard domain by default. Workshops are accessible in your browser without any additional DNS configuration.
+
+#### 2. Publish and deploy a lab
+
+Run these commands from the repo root. Repeat for whichever lab(s) you want to test:
 
 ```bash
+# Lab 1
+educates publish-workshop --name lab-mcp-conversion
 educates deploy-workshop --file lab1-conversion-listener/resources/workshop.yaml
+
+# Lab 2
+educates publish-workshop --name lab-mcp-passthrough
 educates deploy-workshop --file lab2-passthrough-auth/resources/workshop.yaml
+
+# Lab 3
+educates publish-workshop --name lab-mcp-registry
 educates deploy-workshop --file lab3-mcp-registry/resources/workshop.yaml
 ```
 
-### Automated publishing (GitHub Actions)
+`educates publish-workshop` pushes the workshop OCI image to `localhost:5001`. `educates deploy-workshop` registers the workshop with the local training portal, which will print the URL where you can open the lab.
 
-Each lab's `resources/workshop.yaml` references an OCI image tag tied to `$(workshop_version)`. Tag a release to trigger the Educates GitHub Actions workflow:
+#### 3. List workshops and open the training portal
+
+To see every workshop currently deployed to the local cluster:
 
 ```bash
-git tag v1.0.0
-git push origin v1.0.0
+educates list-workshops
 ```
 
-The workflow (`educates/educates-github-actions/publish-workshop@v6`) builds and pushes the image automatically.
+This prints each workshop name, its URL, and current status. To open the training portal directly in your browser — where you can start a session for any deployed lab:
+
+```bash
+educates browse-workshops
+```
+
+If prompted for credentials, retrieve the generated password with:
+
+```bash
+educates view-credentials
+```
+
+The training portal is also where you end an active session and start a fresh one to pick up republished content.
+
+#### 4. Tear down
+
+```bash
+educates delete-cluster
+```
+
+To also remove the local image registry and DNS resolver:
+
+```bash
+educates delete-cluster --all
+```
+
+### Further reading
+
+- [Local Environment](https://docs.educates.dev/en/stable/getting-started/local-environment.html) — cluster creation, custom domains, image mirrors
+- [Working on Content](https://docs.educates.dev/en/stable/workshop-content/working-on-content.html) — live updates, error logs, serve-workshop proxy options
 
 ---
 
@@ -163,4 +213,4 @@ Variables surfaced in the Educates session (set by the instructor at deploy time
 
 Content lives in `workshop/content/*.md` for each lab. Page order is controlled by `workshop/config.yaml` — add the step name to the `steps` list and create the matching `.md` file with a `title:` frontmatter field.
 
-Screenshot assets at the repo root are referenced from content pages using relative paths. When updating screenshots, keep filenames stable so existing references don't break.
+Screenshot assets live in each lab's `workshop/static/images/` directory. Content pages reference them as `{{<baseurl>}}/images/filename.png`. When updating a screenshot, replace the file in the `static/images/` directory of every lab that uses it. Keep filenames stable so existing references don't break.
