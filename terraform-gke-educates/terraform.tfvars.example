@@ -1,0 +1,43 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# terraform-gke-educates — example variable values
+#
+# 1. Copy this file:   cp terraform.tfvars.example terraform.tfvars
+# 2. Fill in the required values (no defaults) and adjust optional ones.
+# 3. Run: terraform init && terraform plan && terraform apply
+# ─────────────────────────────────────────────────────────────────────────────
+
+# ── Required ──────────────────────────────────────────────────────────────────
+
+# GCP project where all resources will be created.
+project_id = "my-gcp-project"
+
+# Wildcard DNS domain for workshop ingress.
+# After apply, point *.workshops.example.com → the static IP in the output.
+ingress_domain = "workshops.example.com"
+
+# ── Optional — override defaults as needed ────────────────────────────────────
+
+# GCP region and zone.
+region = "us-central1"
+zone   = "us-central1-a"
+
+# Cluster and network names.
+cluster_name = "educates-workshop"
+network_name = "educates-network"
+subnet_name  = "educates-subnet"
+
+# Node pool sizing.
+# Minimum for Educates: n2-standard-4 (4 vCPU / 16 GB), 3 nodes.
+machine_type = "n2-standard-4"
+node_count   = 3
+
+# Disk configuration.
+node_disk_size_gb = 100
+node_disk_type    = "pd-balanced"
+
+# Resource labels applied to all GCP resources.
+labels = {
+  managed_by  = "terraform"
+  purpose     = "educates-workshop"
+  environment = "workshop"
+}
