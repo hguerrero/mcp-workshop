@@ -8,6 +8,21 @@ spec:
     Centralize MCP server distribution with the Konnect MCP Registry. Create a
     registry, publish server entries, expose it read-only through Kong, and wire
     IDE clients to auto-discover approved servers — no manual mcp.json editing required.
+  vendor: konghq.com
+  authors:
+  - Kong Technical Product Marketing
+  difficulty: intermediate
+  duration: 30m
+  tags:
+  - kong
+  - mcp
+  - model-context-protocol
+  - ai
+  - gateway
+  - registry
+  - governance
+  - konnect
+  url: https://github.com/kong/mcp-workshop
   publish:
     image: $(image_repository)/lab-mcp-registry-files:$(workshop_version)
   workshop:
@@ -20,15 +35,82 @@ spec:
   session:
     namespaces:
       budget: small
+      security:
+        policy: baseline
     applications:
       console:
-        enabled: true
+        enabled: false
+      docker:
+        enabled: false
       editor:
-        enabled: true
-    env:
-    - name: PROXY
-      value: ""
-    - name: KONNECT_TOKEN
-      value: ""
-    - name: KONNECT_PUBLISH_TOKEN
-      value: ""
+        enabled: false
+      registry:
+        enabled: false
+      terminal:
+        enabled: false
+      vcluster:
+        enabled: false
+    ingresses:
+    - name: mcp-inspector
+      port: 6274
+      host: mcp-inspector-service
+      protocol: TCP
+    dashboards:
+    - name: mcp-inspector
+      url: "$(ingress_protocol)://mcp-inspector-$(session_namespace).$(ingress_domain)/"      
+  environment:
+    objects:
+    - apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: mcp-inspector
+        labels:
+          app: mcp-inspector
+      spec:
+        replicas: 1
+        selector:
+          matchLabels:
+            app: mcp-inspector
+        template:
+          metadata:
+            labels:
+              app: mcp-inspector
+          spec:
+            containers:
+            - name: mcp-inspector
+              image: ghcr.io/modelcontextprotocol/inspector:latest
+              env:
+              - name: HOST
+                value: "0.0.0.0"
+              - name: MCP_AUTO_OPEN_ENABLED
+                value: "false"
+              # It is highly recommended to set an auth token for security
+              - name: DANGEROUSLY_OMIT_AUTH
+                value: "true"
+              ports:
+              - containerPort: 6274
+                name: ui
+              - containerPort: 6277
+                name: proxy
+              resources:
+                requests:
+                  memory: "128Mi"
+                  cpu: "100m"
+                limits:
+                  memory: "512Mi"
+                  cpu: "500m"
+    - apiVersion: v1
+      kind: Service
+      metadata:
+        name: mcp-inspector-service
+      spec:
+        selector:
+          app: mcp-inspector
+        type: ClusterIP
+        ports:
+        - port: 6274
+          targetPort: 6274
+          name: ui
+        - port: 6277
+          targetPort: 6277
+          name: proxy
