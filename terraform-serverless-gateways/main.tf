@@ -75,3 +75,21 @@ resource "konnect_gateway_vault" "student_vault" {
     config_store_id = konnect_gateway_config_store.student_config_store[each.key].id
   })
 }
+
+# Global CORS plugin for each student control plane
+resource "konnect_gateway_plugin_cors" "global_cors" {
+  for_each = toset(local.student_ids)
+
+  control_plane_id = konnect_gateway_control_plane.serverless_cp[each.key].id
+
+  instance_name = "global-cors"
+  
+  config = {
+    allow_origin_absent = true
+    origins = ["*"]
+    methods = ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE", "OPTIONS", "TRACE", "CONNECT"]
+    credentials = true
+    max_age = 3600
+    preflight_continue = false
+  }
+}
