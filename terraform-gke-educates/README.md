@@ -81,7 +81,7 @@ The `educates deploy-platform` step installs Contour (with the reserved IP), cer
 | `pods_cidr` | Pod secondary range CIDR | `string` | `10.1.0.0/16` | |
 | `services_cidr` | Service secondary range CIDR | `string` | `10.2.0.0/20` | |
 | `machine_type` | Worker node machine type | `string` | `n2-standard-4` | |
-| `node_count` | Number of worker nodes | `number` | `3` | |
+| `node_count` | Number of worker nodes | `number` | `1` | |
 | `node_disk_size_gb` | Worker node boot disk size (GB) | `number` | `100` | |
 | `node_disk_type` | Worker node disk type | `string` | `pd-balanced` | |
 | `kubernetes_version` | Minimum GKE master version (empty = channel default) | `string` | `""` | |
@@ -138,17 +138,44 @@ This file is consumed by `educates deploy-platform --config educates-config.yaml
 
 ## DNS Setup
 
-Educates uses wildcard DNS so every workshop session gets its own subdomain. After apply:
+Educates uses wildcard DNS so every workshop session gets its own subdomain. This module creates a **Cloud DNS managed zone** for your ingress domain and expects your root domain to remain in Cloudflare. You delegate only the workshop subdomain to Google Cloud DNS — no Cloudflare configuration is lost.
 
-1. Get the static IP: `terraform output ingress_ip`
-2. In your DNS provider, create an **A record**:
-   - **Host:** `*.workshops.example.com` (or your chosen domain)
-   - **Value:** the IP from step 1
-   - **TTL:** 300 (or lower for faster propagation during setup)
+### Step 1 — Delegate the subdomain from Cloudflare to Google Cloud DNS
+
+After `terraform apply`, get the four Google nameservers assigned to the zone:
+
+```bash
+terraform output dns_name_servers
+```
+
+In Cloudflare → your root domain → **DNS** → **Add record**, add four **NS records** for the subdomain:
+
+| Type | Name | Value |
+|---|---|---|
+| NS | `workshops` | `ns-cloud-a1.googledomains.com.` |
+| NS | `workshops` | `ns-cloud-a2.googledomains.com.` |
+| NS | `workshops` | `ns-cloud-a3.googledomains.com.` |
+| NS | `workshops` | `ns-cloud-a4.googledomains.com.` |
+
+> Use the actual values from `terraform output dns_name_servers` — the names above are illustrative. Set TTL to 300 for faster propagation during initial setup.
+
+After this step, Google Cloud DNS is authoritative for `*.workshops.example.com`. Cloudflare remains authoritative for everything else on your domain.
+
+### Step 2 — Point the wildcard A record at the ingress IP
+
+Once DNS has propagated, external-dns (installed by Educates) manages A records automatically. The static IP is reserved so Contour always gets the same address:
+
+```bash
+terraform output ingress_ip
+```
 
 ---
 
 ## Teardown
+
+> **Before destroying:** Cloudflare NS records pointing at the Google Cloud DNS zone must be removed manually first, otherwise you'll have dangling delegation records on Cloudflare.
+
+
 
 ```bash
 terraform destroy

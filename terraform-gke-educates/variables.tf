@@ -6,13 +6,13 @@ variable "project_id" {
 variable "region" {
   description = "GCP region for the GKE cluster and supporting resources"
   type        = string
-  default     = "us-central1"
+  default     = "us-east1"
 }
 
 variable "zone" {
   description = "GCP zone for the GKE control plane (used for zonal clusters)"
   type        = string
-  default     = "us-central1-a"
+  default     = "us-east1-b"
 }
 
 variable "cluster_name" {
@@ -58,9 +58,9 @@ variable "machine_type" {
 }
 
 variable "node_count" {
-  description = "Number of worker nodes in the node pool. Educates requires a minimum of 3."
+  description = "Number of worker nodes in the node pool. 1 is sufficient for non-HA workshop environments."
   type        = number
-  default     = 3
+  default     = 1
 }
 
 variable "node_disk_size_gb" {
@@ -83,6 +83,11 @@ variable "kubernetes_version" {
 
 variable "ingress_domain" {
   description = "Wildcard DNS domain used for workshop ingress (e.g. workshops.example.com). A DNS A record *.workshops.example.com must point at the static IP output by this module."
+  type        = string
+}
+
+variable "cloud_dns_zone" {
+  description = "Name of the Cloud DNS managed zone that covers the ingress domain (e.g. example-com). Used by external-dns and cert-manager for DNS-01 challenges."
   type        = string
 }
 

@@ -72,11 +72,9 @@ resource "google_container_cluster" "educates" {
     services_secondary_range_name = "services"
   }
 
-  # Network Policy — required by Educates / Kyverno
-  network_policy {
-    enabled  = true
-    provider = "CALICO"
-  }
+  # Dataplane V2 — enforces NetworkPolicy natively via eBPF.
+  # Faster than Calico (no DaemonSet rollout) and required by Educates/Kyverno.
+  datapath_provider = "ADVANCED_DATAPATH"
 
   # Workload Identity — required for GKE
   dynamic "workload_identity_config" {
@@ -134,8 +132,10 @@ resource "google_container_node_pool" "educates_nodes" {
 
     labels = var.labels
 
+    # Integrity monitoring kept on (low overhead); secure boot disabled —
+    # it adds per-node boot verification that significantly slows pool creation.
     shielded_instance_config {
-      enable_secure_boot          = true
+      enable_secure_boot          = false
       enable_integrity_monitoring = true
     }
   }
@@ -149,6 +149,87 @@ resource "google_container_node_pool" "educates_nodes" {
     max_surge       = 1
     max_unavailable = 0
   }
+}
+
+# ─────────────────────────────────────────────
+# Cloud DNS managed zone
+#
+# Covers the ingress_domain subdomain only (e.g. workshops.example.com).
+# Your root domain stays in Cloudflare — you only need to add NS records
+# in Cloudflare that delegate this subdomain to Google Cloud DNS.
+#
+# After apply, run:
+#   terraform output dns_name_servers
+# then add those four NS records for the subdomain in Cloudflare.
+# ─────────────────────────────────────────────
+
+resource "google_dns_managed_zone" "educates" {
+  name        = var.cloud_dns_zone
+  dns_name    = "${var.ingress_domain}."
+  description = "Educates workshop ingress domain — managed by Terraform"
+  project     = var.project_id
+
+  labels = var.labels
+}
+
+# ─────────────────────────────────────────────
+# Workload Identity — Service Accounts for Educates
+#
+# Educates requires two GSAs with DNS admin rights so that
+# external-dns and cert-manager can manage Cloud DNS records:
+#   external-dns  → manages DNS A records for workshop ingress hostnames
+#   cert-manager  → performs ACME DNS-01 challenges for TLS certificates
+#
+# Each GSA is bound to the Kubernetes Service Account (KSA) that
+# Educates creates in the cluster, following the standard Workload
+# Identity pattern: KSA → GSA via iam.workloadIdentityUser.
+# ─────────────────────────────────────────────
+
+resource "google_service_account" "external_dns" {
+  account_id   = "${var.cluster_name}-ext-dns"
+  display_name = "Educates external-dns (${var.cluster_name})"
+  project      = var.project_id
+}
+
+resource "google_service_account" "cert_manager" {
+  account_id   = "${var.cluster_name}-cert-mgr"
+  display_name = "Educates cert-manager (${var.cluster_name})"
+  project      = var.project_id
+}
+
+# Grant both GSAs DNS admin so they can create/update Cloud DNS records
+resource "google_project_iam_member" "external_dns_dns_admin" {
+  project = var.project_id
+  role    = "roles/dns.admin"
+  member  = "serviceAccount:${google_service_account.external_dns.email}"
+}
+
+resource "google_project_iam_member" "cert_manager_dns_admin" {
+  project = var.project_id
+  role    = "roles/dns.admin"
+  member  = "serviceAccount:${google_service_account.cert_manager.email}"
+}
+
+# Workload Identity bindings — allow the KSAs created by Educates to
+# impersonate the GSAs above.
+#
+# KSA namespaces/names used by Educates:
+#   external-dns  → namespace: external-dns,  serviceaccount: external-dns
+#   cert-manager  → namespace: cert-manager,  serviceaccount: cert-manager
+resource "google_service_account_iam_member" "external_dns_wi" {
+  service_account_id = google_service_account.external_dns.name
+  role               = "roles/iam.workloadIdentityUser"
+  member             = "serviceAccount:${var.project_id}.svc.id.goog[external-dns/external-dns]"
+
+  depends_on = [google_container_cluster.educates]
+}
+
+resource "google_service_account_iam_member" "cert_manager_wi" {
+  service_account_id = google_service_account.cert_manager.name
+  role               = "roles/iam.workloadIdentityUser"
+  member             = "serviceAccount:${var.project_id}.svc.id.goog[cert-manager/cert-manager]"
+
+  depends_on = [google_container_cluster.educates]
 }
 
 # ─────────────────────────────────────────────
@@ -172,7 +253,14 @@ resource "local_file" "educates_config" {
     #   educates deploy-platform --config educates-config.yaml
 
     clusterInfrastructure:
-      provider: gke
+      provider: "gke"
+      gcp:
+        project: "${var.project_id}"
+        cloudDNS:
+          zone: "${var.cloud_dns_zone}"
+        workloadIdentity:
+          external-dns: "${google_service_account.external_dns.email}"
+          cert-manager: "${google_service_account.cert_manager.email}"
 
     clusterIngress:
       domain: "${var.ingress_domain}"
@@ -185,11 +273,12 @@ resource "local_file" "educates_config" {
         settings:
           infrastructure:
             loadBalancerIP: "${google_compute_address.ingress.address}"
-      certManager:
+      cert-manager:
         enabled: true
       kyverno:
         enabled: true
       educates:
         enabled: true
+
   YAML
 }

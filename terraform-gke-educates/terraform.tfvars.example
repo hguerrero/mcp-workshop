@@ -15,11 +15,16 @@ project_id = "my-gcp-project"
 # After apply, point *.workshops.example.com → the static IP in the output.
 ingress_domain = "workshops.example.com"
 
+# Name of the Cloud DNS managed zone that covers the ingress domain.
+# Find it in GCP Console → Network Services → Cloud DNS, or:
+#   gcloud dns managed-zones list --project YOUR_PROJECT_ID
+cloud_dns_zone = "example-com"
+
 # ── Optional — override defaults as needed ────────────────────────────────────
 
 # GCP region and zone.
-region = "us-central1"
-zone   = "us-central1-a"
+region = "us-east1"
+zone   = "us-east1-b"
 
 # Cluster and network names.
 cluster_name = "educates-workshop"
@@ -27,9 +32,10 @@ network_name = "educates-network"
 subnet_name  = "educates-subnet"
 
 # Node pool sizing.
-# Minimum for Educates: n2-standard-4 (4 vCPU / 16 GB), 3 nodes.
+# 1 node is sufficient for non-HA workshop environments.
+# Scale up node_count if running many concurrent students.
 machine_type = "n2-standard-4"
-node_count   = 3
+node_count   = 1
 
 # Disk configuration.
 node_disk_size_gb = 100
