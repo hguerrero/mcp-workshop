@@ -22,11 +22,11 @@ spec:
   - conversion-listener
   url: https://github.com/kong/mcp-workshop
   publish:
-    image: $(image_repository)/lab-mcp-conversion-files:$(workshop_version)
+    image: docker.io/hguerreroo/lab-mcp-conversion-files:latest
   workshop:
     files:
     - image:
-        url: $(image_repository)/lab-mcp-conversion-files:$(workshop_version)
+        url: docker.io/hguerreroo/lab-mcp-conversion-files:latest
       includePaths:
       - /workshop/**
       - /exercises/**
@@ -37,6 +37,8 @@ spec:
       security:
         policy: baseline
     applications:
+      workshop:
+        layout: none    
       console:
         enabled: false
       docker:
@@ -55,7 +57,9 @@ spec:
       host: mcp-inspector-service
       protocol: TCP
     dashboards:
-    - name: mcp-inspector
+    - name: Instructions
+      url: /workshop/    
+    - name: MCP Inspector
       url: "$(ingress_protocol)://mcp-inspector-$(session_namespace).$(ingress_domain)/"      
   environment:
     objects:
