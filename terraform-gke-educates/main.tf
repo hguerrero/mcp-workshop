@@ -108,10 +108,15 @@ resource "google_container_cluster" "educates" {
     channel = "REGULAR"
   }
 
-  # Disable GKE's built-in HTTP(S) LB addon — Contour manages ingress instead
+  # Disable GKE's built-in HTTP(S) LB addon — Contour manages ingress instead.
+  # network_policy_config must be explicitly enabled here when Calico is used,
+  # otherwise GKE rejects the node pool update with a 400.
   addons_config {
     http_load_balancing {
       disabled = true
+    }
+    network_policy_config {
+      disabled = false
     }
   }
 

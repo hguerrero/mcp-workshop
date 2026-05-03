@@ -25,11 +25,11 @@ spec:
   - konnect
   url: https://github.com/kong/mcp-workshop
   publish:
-    image: $(image_repository)/lab-mcp-passthrough-files:$(workshop_version)
+    image: docker.io/hguerreroo/lab-mcp-passthrough-files:latest
   workshop:
     files:
     - image:
-        url: $(image_repository)/lab-mcp-passthrough-files:$(workshop_version)
+        url: docker.io/hguerreroo/lab-mcp-passthrough-files:latest
       includePaths:
       - /workshop/**
       - /README.md

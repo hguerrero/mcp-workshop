@@ -24,11 +24,11 @@ spec:
   - konnect
   url: https://github.com/kong/mcp-workshop
   publish:
-    image: $(image_repository)/lab-mcp-registry-files:$(workshop_version)
+    image: docker.io/hguerreroo/lab-mcp-registry-files:latest
   workshop:
     files:
     - image:
-        url: $(image_repository)/lab-mcp-registry-files:$(workshop_version)
+        url: docker.io/hguerreroo/lab-mcp-registry-files:latest
       includePaths:
       - /workshop/**
       - /README.md
