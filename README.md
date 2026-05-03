@@ -10,9 +10,9 @@ The series is split into three independent labs. Each can be run on its own; Lab
 
 | Lab | Title | Focus | Steps |
 |-----|-------|-------|-------|
-| [Lab 1](lab1-conversion-listener/) | **Conversion Listener** | Turn any REST API into an MCP server using Kong's AI MCP Proxy Plugin in `conversion-listener` mode. No upstream changes required. | 7 |
-| [Lab 2](lab2-passthrough-auth/) | **Passthrough + Auth** | Front an existing MCP server with Kong in `passthrough-listener` mode, inject upstream credentials from Konnect Vault, and enforce OAuth2/PKCE via Kong Identity. | 7 |
-| [Lab 3](lab3-mcp-registry/) | **Registry & Governance** | Centralize MCP server distribution with the Konnect MCP Registry. Publish server entries and expose the registry read-only through Kong so IDEs auto-discover approved servers. | 6 |
+| [Lab 1](workshops/lab1-conversion-listener/) | **Conversion Listener** | Turn any REST API into an MCP server using Kong's AI MCP Proxy Plugin in `conversion-listener` mode. No upstream changes required. | 7 |
+| [Lab 2](workshops/lab2-passthrough-auth/) | **Passthrough + Auth** | Front an existing MCP server with Kong in `passthrough-listener` mode, inject upstream credentials from Konnect Vault, and enforce OAuth2/PKCE via Kong Identity. | 7 |
+| [Lab 3](workshops/lab3-mcp-registry/) | **Registry & Governance** | Centralize MCP server distribution with the Konnect MCP Registry. Publish server entries and expose the registry read-only through Kong so IDEs auto-discover approved servers. | 6 |
 
 ---
 
@@ -20,37 +20,46 @@ The series is split into three independent labs. Each can be run on its own; Lab
 
 ```
 kong--mcp-workshop/
-├── lab1-conversion-listener/
-│   ├── resources/workshop.yaml       # Educates Workshop CRD
-│   └── workshop/
-│       ├── config.yaml               # Hugo pathway & nav
-│       ├── content/                  # Markdown pages (00–06)
-│       └── static/images/            # Screenshot assets for Lab 1
-│
-├── lab2-passthrough-auth/
-│   ├── resources/workshop.yaml
-│   └── workshop/
-│       ├── config.yaml
-│       ├── content/                  # Markdown pages (00–06)
-│       └── static/images/            # Screenshot assets for Lab 2
-│
-├── lab3-mcp-registry/
-│   ├── resources/workshop.yaml
-│   └── workshop/
-│       ├── config.yaml
-│       ├── content/                  # Markdown pages (00–05)
-│       └── static/images/            # Screenshot assets for Lab 3
+├── workshops/
+│   ├── lab1-conversion-listener/
+│   │   ├── resources/workshop.yaml       # Educates Workshop CRD
+│   │   └── workshop/
+│   │       ├── config.yaml               # Hugo pathway & nav
+│   │       ├── content/                  # Markdown pages (00–06)
+│   │       └── static/images/            # Screenshot assets for Lab 1
+│   │
+│   ├── lab2-passthrough-auth/
+│   │   ├── resources/workshop.yaml
+│   │   └── workshop/
+│   │       ├── config.yaml
+│   │       ├── content/                  # Markdown pages (00–06)
+│   │       └── static/images/            # Screenshot assets for Lab 2
+│   │
+│   └── lab3-mcp-registry/
+│       ├── resources/workshop.yaml
+│       └── workshop/
+│           ├── config.yaml
+│           ├── content/                  # Markdown pages (00–05)
+│           └── static/images/            # Screenshot assets for Lab 3
 │
 ├── decK/
 │   └── konnect-mcp/
 │       └── config.yaml               # Declarative Kong config for Lab 2 (passthrough + auth)
 │
-└── terraform-serverless-gateways/    # Instructor: provision per-student environments
-    ├── main.tf
-    ├── variables.tf
-    ├── outputs.tf
-    ├── provider.tf
-    └── terraform.tfvars.example
+└── terraform/
+    ├── gke-educates/                 # Instructor: provision GKE cluster for Educates
+    │   ├── main.tf
+    │   ├── variables.tf
+    │   ├── outputs.tf
+    │   ├── provider.tf
+    │   └── terraform.tfvars.example
+    │
+    └── kong-serverless-gateways/    # Instructor: provision per-student Konnect environments
+        ├── main.tf
+        ├── variables.tf
+        ├── outputs.tf
+        ├── provider.tf
+        └── terraform.tfvars.example
 ```
 
 ---
@@ -67,12 +76,12 @@ Each lab specifies its own prerequisites in the Workshop Overview page. The comm
 
 ### For Instructors
 
-Before running a session you need to provision one isolated Konnect environment per student. The [`terraform-serverless-gateways/`](terraform-serverless-gateways/) module handles this. Each student environment includes a Konnect Serverless Gateway, a Kong Identity auth server and pre-registered client application, and a Konnect Config Store and Vault (prefix `ai`) for upstream secret injection.
+Before running a session you need to provision one isolated Konnect environment per student. The [`terraform/kong-serverless-gateways/`](terraform/kong-serverless-gateways/) module handles this. Each student environment includes a Konnect Serverless Gateway, a Kong Identity auth server and pre-registered client application, and a Konnect Config Store and Vault (prefix `ai`) for upstream secret injection.
 
 **Quick start:**
 
 ```bash
-cd terraform-serverless-gateways
+cd terraform/kong-serverless-gateways
 cp terraform.tfvars.example terraform.tfvars
 # Edit terraform.tfvars — set konnect_personal_access_token, system_account_id, and student_count
 terraform init
@@ -88,7 +97,9 @@ terraform output auth_server_urls          # → $KONG_IDENTITY_ISSUER per stude
 terraform output application_client_ids    # → $KONG_MCP_CLIENT_ID per student
 ```
 
-See the [Terraform README](terraform-serverless-gateways/README.md) for the full variable reference, output descriptions, and teardown instructions.
+See the [Terraform README](terraform/kong-serverless-gateways/README.md) for the full variable reference, output descriptions, and teardown instructions.
+
+The Educates cluster that serves the lab instructions is provisioned separately by the [`terraform/gke-educates/`](terraform/gke-educates/) module. See its [README](terraform/gke-educates/README.md) for setup instructions.
 
 > **Note:** Terraform provisions the **Konnect infrastructure** (gateways, auth servers, vaults). The workshop instructions themselves — the step-by-step lab content students follow — are delivered via the Educates platform. See the next section for how to publish and deploy those.
 
@@ -124,15 +135,15 @@ Run these commands from the repo root. Repeat for whichever lab(s) you want to t
 ```bash
 # Lab 1
 educates publish-workshop --name lab-mcp-conversion
-educates deploy-workshop --file lab1-conversion-listener/resources/workshop.yaml
+educates deploy-workshop --file workshops/lab1-conversion-listener/resources/workshop.yaml
 
 # Lab 2
 educates publish-workshop --name lab-mcp-passthrough
-educates deploy-workshop --file lab2-passthrough-auth/resources/workshop.yaml
+educates deploy-workshop --file workshops/lab2-passthrough-auth/resources/workshop.yaml
 
 # Lab 3
 educates publish-workshop --name lab-mcp-registry
-educates deploy-workshop --file lab3-mcp-registry/resources/workshop.yaml
+educates deploy-workshop --file workshops/lab3-mcp-registry/resources/workshop.yaml
 ```
 
 `educates publish-workshop` pushes the workshop OCI image to `localhost:5001`. `educates deploy-workshop` registers the workshop with the local training portal, which will print the URL where you can open the lab.

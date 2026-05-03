@@ -1,8 +1,8 @@
-# terraform-gke-educates
+# terraform/gke-educates
 
 Terraform module that provisions GKE infrastructure for running the [Educates](https://docs.educates.dev) workshop platform. After `terraform apply` you have a ready-to-use GKE cluster and a generated `educates-config.yaml` you can pass directly to `educates deploy-platform`.
 
-This module is independent from the [`terraform-serverless-gateways/`](../terraform-serverless-gateways/) module, which provisions the per-student Konnect environments.
+This module is independent from the [`terraform/kong-serverless-gateways/`](../kong-serverless-gateways/) module, which provisions the per-student Konnect environments.
 
 ---
 
@@ -13,9 +13,13 @@ This module is independent from the [`terraform-serverless-gateways/`](../terraf
 | `google_compute_network` | Dedicated VPC for the cluster |
 | `google_compute_subnetwork` | Subnet with secondary ranges for pod and service IPs |
 | `google_compute_address` | Static external IP for the Contour ingress load balancer |
-| `google_container_cluster` | GKE Standard cluster (not Autopilot) with NetworkPolicy and Workload Identity |
-| `google_container_node_pool` | Worker node pool — defaults to 3 × `n2-standard-4` with COS_CONTAINERD |
-| `local_file` (educates-config.yaml) | Rendered Educates platform config file written to the module directory |
+| `google_container_cluster` | GKE Standard cluster (not Autopilot) with Calico NetworkPolicy and Workload Identity |
+| `google_container_node_pool` | Worker node pool — defaults to 1 × `n2-standard-4` with COS_CONTAINERD |
+| `google_service_account` (node) | Dedicated node service account (least-privilege, replaces default compute SA) |
+| `google_service_account` (ext-dns / cert-mgr) | GSAs for external-dns and cert-manager Workload Identity |
+| `google_dns_managed_zone` | Cloud DNS zone for the ingress domain (delegate subdomain from Cloudflare) |
+| `local_file` (educates-config.yaml) | Rendered Educates platform config written to the module directory |
+| `local_file` (kubeconfig-*.yaml) | Ready-to-use kubeconfig written to the module directory after apply |
 
 ---
 
@@ -39,9 +43,9 @@ gcloud services enable container.googleapis.com compute.googleapis.com \
 ## Quick Start
 
 ```bash
-cd terraform-gke-educates
+cd terraform/gke-educates
 cp terraform.tfvars.example terraform.tfvars
-# Edit terraform.tfvars — set project_id and ingress_domain at minimum
+# Edit terraform.tfvars — set project_id, ingress_domain, and cloud_dns_zone at minimum
 terraform init
 terraform plan
 terraform apply
@@ -50,12 +54,11 @@ terraform apply
 After `apply` completes:
 
 ```bash
-# 1. Configure kubectl
-$(terraform output -raw kubeconfig_command)
+# 1. Use the generated kubeconfig (or run the gcloud command)
+export KUBECONFIG=$(terraform output -raw kubeconfig_file)
 
-# 2. Create a wildcard DNS A record pointing to the static IP
-terraform output ingress_ip
-# → 34.X.X.X  (create: *.workshops.example.com → this IP)
+# 2. Delegate the ingress subdomain in Cloudflare using these NS records
+terraform output dns_name_servers
 
 # 3. Deploy the Educates platform onto the cluster
 $(terraform output -raw educates_deploy_command)
@@ -72,8 +75,9 @@ The `educates deploy-platform` step installs Contour (with the reserved IP), cer
 |---|---|---|---|---|
 | `project_id` | GCP project ID | `string` | — | ✅ |
 | `ingress_domain` | Wildcard DNS domain for workshop ingress | `string` | — | ✅ |
-| `region` | GCP region | `string` | `us-central1` | |
-| `zone` | GCP zone (cluster location) | `string` | `us-central1-a` | |
+| `cloud_dns_zone` | Cloud DNS managed zone name covering the ingress domain | `string` | — | ✅ |
+| `region` | GCP region | `string` | `us-east1` | |
+| `zone` | GCP zone (cluster location) | `string` | `us-east1-b` | |
 | `cluster_name` | GKE cluster name | `string` | `educates-workshop` | |
 | `network_name` | VPC network name | `string` | `educates-network` | |
 | `subnet_name` | Subnet name | `string` | `educates-subnet` | |
@@ -84,11 +88,11 @@ The `educates deploy-platform` step installs Contour (with the reserved IP), cer
 | `node_count` | Number of worker nodes | `number` | `1` | |
 | `node_disk_size_gb` | Worker node boot disk size (GB) | `number` | `100` | |
 | `node_disk_type` | Worker node disk type | `string` | `pd-balanced` | |
-| `kubernetes_version` | Minimum GKE master version (empty = channel default) | `string` | `""` | |
+| `kubernetes_version` | Kubernetes minor version prefix (`1.30`–`1.33`) | `string` | `1.33` | |
 | `enable_workload_identity` | Enable Workload Identity | `bool` | `true` | |
 | `labels` | Labels applied to all GCP resources | `map(string)` | see variables.tf | |
 
-> **Node sizing:** Educates requires a minimum of **4 vCPU / 16 GB RAM** per node and **3 or more** worker nodes. `n2-standard-4` is the recommended default. Do not downsize below this or workshop sessions will be resource-starved.
+> **Node sizing:** Educates requires a minimum of **4 vCPU / 16 GB RAM** per node. `n2-standard-4` is the recommended default. Scale `node_count` up for larger cohorts.
 
 ---
 
@@ -100,8 +104,13 @@ The `educates deploy-platform` step installs Contour (with the reserved IP), cer
 | `cluster_location` | Zone of the cluster |
 | `cluster_endpoint` | API server endpoint (sensitive) |
 | `ingress_ip` | Static IP — point `*.<ingress_domain>` DNS A record here |
-| `kubeconfig_command` | `gcloud` command to configure `kubectl` |
+| `dns_name_servers` | Google Cloud DNS NS records — add these to Cloudflare for subdomain delegation |
+| `kubeconfig_file` | Path to the generated `kubeconfig-<cluster>.yaml` file |
+| `kubeconfig_command` | `gcloud` command to configure `kubectl` (alternative to kubeconfig file) |
 | `educates_deploy_command` | `educates deploy-platform` command with generated config path |
+| `node_service_account` | Email of the dedicated GKE node service account |
+| `external_dns_service_account` | Email of the GSA bound to external-dns via Workload Identity |
+| `cert_manager_service_account` | Email of the GSA bound to cert-manager via Workload Identity |
 | `network_name` | VPC network name |
 | `subnet_name` | Subnet name |
 
@@ -113,10 +122,17 @@ After `terraform apply` a file named `educates-config.yaml` is written to the mo
 
 ```yaml
 clusterInfrastructure:
-  provider: gke
+  provider: "gke"
+  gcp:
+    project: "my-project"
+    cloudDNS:
+      zone: "educates.example.com"
+    workloadIdentity:
+      external-dns: "educates-workshop-ext-dns@my-project.iam.gserviceaccount.com"
+      cert-manager: "educates-workshop-cert-mgr@my-project.iam.gserviceaccount.com"
 
 clusterIngress:
-  domain: "workshops.example.com"
+  domain: "educates.example.com"
 
 clusterPackages:
   contour:
@@ -124,7 +140,7 @@ clusterPackages:
     settings:
       infrastructure:
         loadBalancerIP: "34.X.X.X"
-  certManager:
+  cert-manager:
     enabled: true
   kyverno:
     enabled: true
@@ -188,11 +204,11 @@ terraform destroy
 ## Relationship to Other Modules
 
 ```
-terraform-gke-educates/         ← this module
+terraform/gke-educates/              ← this module
   └── provisions: GKE cluster + Educates platform
       used for: running Educates lab instructions
 
-terraform-serverless-gateways/  ← separate module
+terraform/kong-serverless-gateways/  ← separate module
   └── provisions: per-student Konnect environments
       used for: Kong Gateway, auth servers, vaults
 ```
