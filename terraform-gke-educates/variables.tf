@@ -76,9 +76,14 @@ variable "node_disk_type" {
 }
 
 variable "kubernetes_version" {
-  description = "Minimum GKE master version. Leave empty to use the default channel version."
+  description = "Kubernetes minor version prefix for the GKE cluster (e.g. '1.33'). The latest available patch in that minor version is used automatically."
   type        = string
-  default     = ""
+  default     = "1.33"
+
+  validation {
+    condition     = contains(["1.30", "1.31", "1.32", "1.33"], var.kubernetes_version)
+    error_message = "kubernetes_version must be one of: 1.30, 1.31, 1.32, 1.33"
+  }
 }
 
 variable "ingress_domain" {
