@@ -19,14 +19,24 @@ output "ingress_ip" {
   value       = google_compute_address.ingress.address
 }
 
+output "kubeconfig_file" {
+  description = "Path to the generated kubeconfig file for the cluster"
+  value       = local.kubeconfig_filename
+}
+
 output "kubeconfig_command" {
-  description = "gcloud command to configure kubectl access to the cluster"
+  description = "gcloud command to configure kubectl access to the cluster (alternative to the generated kubeconfig file)"
   value       = "gcloud container clusters get-credentials ${google_container_cluster.educates.name} --zone ${var.zone} --project ${var.project_id}"
 }
 
 output "educates_deploy_command" {
-  description = "educates CLI command to install the Educates platform onto the cluster (run after kubeconfig_command)"
+  description = "educates CLI command to install the Educates platform onto the cluster"
   value       = "educates deploy-platform --config ${abspath(local_file.educates_config.filename)}"
+}
+
+output "node_service_account" {
+  description = "Email of the dedicated GKE node service account"
+  value       = google_service_account.node_sa.email
 }
 
 output "dns_name_servers" {

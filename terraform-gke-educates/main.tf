@@ -30,6 +30,20 @@ resource "google_compute_subnetwork" "educates" {
 }
 
 # ─────────────────────────────────────────────
+# Data sources
+# ─────────────────────────────────────────────
+
+data "google_client_config" "default" {}
+
+# Resolves the latest available patch version for the requested minor version
+# (e.g. "1.33" → "1.33.2-gke.1200"). Avoids version drift from hardcoded strings.
+data "google_container_engine_versions" "gke_versions" {
+  project        = var.project_id
+  location       = var.zone
+  version_prefix = "${var.kubernetes_version}."
+}
+
+# ─────────────────────────────────────────────
 # Static external IP for the Contour ingress LB
 # ─────────────────────────────────────────────
 
@@ -72,9 +86,12 @@ resource "google_container_cluster" "educates" {
     services_secondary_range_name = "services"
   }
 
-  # Dataplane V2 — enforces NetworkPolicy natively via eBPF.
-  # Faster than Calico (no DaemonSet rollout) and required by Educates/Kyverno.
-  datapath_provider = "ADVANCED_DATAPATH"
+  # Calico network policy — required by Educates.
+  # Note: adds ~10-15 min to node pool creation while Calico DaemonSet rolls out.
+  network_policy {
+    enabled  = true
+    provider = "CALICO"
+  }
 
   # Workload Identity — required for GKE
   dynamic "workload_identity_config" {
@@ -84,18 +101,38 @@ resource "google_container_cluster" "educates" {
     }
   }
 
-  # Minimum master version (empty string defers to the release channel default)
-  min_master_version = var.kubernetes_version != "" ? var.kubernetes_version : null
+  # Use the latest patch in the requested minor version
+  min_master_version = data.google_container_engine_versions.gke_versions.latest_master_version
 
-  # Release channel — REGULAR keeps patch versions stable between applies
   release_channel {
-    channel = var.kubernetes_version != "" ? "UNSPECIFIED" : "REGULAR"
+    channel = "REGULAR"
+  }
+
+  # Disable GKE's built-in HTTP(S) LB addon — Contour manages ingress instead
+  addons_config {
+    http_load_balancing {
+      disabled = true
+    }
   }
 
   # Allow deletion without protection (suitable for ephemeral workshop environments)
   deletion_protection = false
 
   resource_labels = var.labels
+}
+
+# ─────────────────────────────────────────────
+# Dedicated node service account
+#
+# Using a dedicated SA instead of the default compute SA limits the blast
+# radius if a node is compromised. OAuth scopes further restrict what
+# the node processes can call on behalf of the SA.
+# ─────────────────────────────────────────────
+
+resource "google_service_account" "node_sa" {
+  account_id   = "${var.cluster_name}-node-sa"
+  display_name = "GKE node service account for ${var.cluster_name}"
+  project      = var.project_id
 }
 
 # ─────────────────────────────────────────────
@@ -126,7 +163,15 @@ resource "google_container_node_pool" "educates_nodes" {
       }
     }
 
+    service_account = google_service_account.node_sa.email
+
     oauth_scopes = [
+      "https://www.googleapis.com/auth/trace.append",
+      "https://www.googleapis.com/auth/service.management.readonly",
+      "https://www.googleapis.com/auth/monitoring",
+      "https://www.googleapis.com/auth/devstorage.read_only",
+      "https://www.googleapis.com/auth/servicecontrol",
+      "https://www.googleapis.com/auth/logging.write",
       "https://www.googleapis.com/auth/cloud-platform",
     ]
 
@@ -257,7 +302,7 @@ resource "local_file" "educates_config" {
       gcp:
         project: "${var.project_id}"
         cloudDNS:
-          zone: "${var.cloud_dns_zone}"
+          zone: "${var.ingress_domain}"
         workloadIdentity:
           external-dns: "${google_service_account.external_dns.email}"
           cert-manager: "${google_service_account.cert_manager.email}"
@@ -281,4 +326,54 @@ resource "local_file" "educates_config" {
         enabled: true
 
   YAML
+}
+
+# ─────────────────────────────────────────────
+# Kubeconfig file
+#
+# Written to the module directory after apply.
+# Uses gke-gcloud-auth-plugin for token refresh — required for kubectl ≥ 1.26.
+# ─────────────────────────────────────────────
+
+locals {
+  kubeconfig_filename = "${path.module}/kubeconfig-${var.cluster_name}.yaml"
+
+  kubeconfig = yamlencode({
+    apiVersion      = "v1"
+    kind            = "Config"
+    current-context = var.cluster_name
+    clusters = [{
+      name = var.cluster_name
+      cluster = {
+        certificate-authority-data = google_container_cluster.educates.master_auth[0].cluster_ca_certificate
+        server                     = "https://${google_container_cluster.educates.endpoint}"
+      }
+    }]
+    contexts = [{
+      name = var.cluster_name
+      context = {
+        cluster = var.cluster_name
+        user    = var.cluster_name
+      }
+    }]
+    users = [{
+      name = var.cluster_name
+      user = {
+        exec = {
+          apiVersion      = "client.authentication.k8s.io/v1beta1"
+          command         = "gke-gcloud-auth-plugin"
+          installHint     = "Install gke-gcloud-auth-plugin: https://cloud.google.com/kubernetes-engine/docs/how-to/cluster-access-for-kubectl#install_plugin"
+          interactiveMode = "IfAvailable"
+        }
+      }
+    }]
+  })
+}
+
+resource "local_file" "kubeconfig" {
+  content         = local.kubeconfig
+  filename        = local.kubeconfig_filename
+  file_permission = "0600"
+
+  depends_on = [google_container_cluster.educates]
 }
