@@ -1,0 +1,43 @@
+apiVersion: training.educates.dev/v1beta1
+kind: TrainingPortal
+metadata:
+  name: portal
+spec:
+  portal:
+    ingress:
+      hostname: portal
+    password: agenticera
+    registration:
+      type: anonymous
+    sessions:
+      maximum: 50
+    updates:
+      workshop: true
+    workshop:
+      defaults:
+        reserved: 0
+  workshops:
+  - alias: "lab1"
+    expires: 30m
+    initial: 0
+    name: lab-mcp-conversion
+    orphaned: 5m
+    overdue: 2m
+    registry:
+      host: docker.io
+      namespace: hguerreroo
+    reserved: 0
+  - alias: "lab2"
+    expires: 30m
+    initial: 0
+    name: lab-mcp-passthrough
+    orphaned: 5m
+    overdue: 2m
+    reserved: 0
+  - alias: "lab3"
+    expires: 30m
+    initial: 0
+    name: lab-mcp-registry
+    orphaned: 5m
+    overdue: 2m
+    reserved: 0
