@@ -330,6 +330,39 @@ resource "local_file" "educates_config" {
       educates:
         enabled: true
 
+    websiteStyling:
+      workshopDashboard:
+        style: |
+          .bg-primary {
+            background-color: #000f06 !important;
+          }
+          /* Override for all nav-pills */
+          .nav-pills {
+            --bs-nav-pills-link-active-bg: #ccff00; /* Your custom color */
+            --bs-nav-pills-link-active-color: #000f06; /* Optional: Change text color too */
+          }
+      workshopInstructions:
+        style: |
+          .bg-primary {
+            background-color: #000f06 !important;
+          }
+      trainingPortal:
+        style: |
+          /* Normal state */
+          .btn-primary {
+            color: #000f06;
+            background-color: #ccff00;
+            border-color: #ccff00;
+          }
+          /* Hover/Active states */
+          .btn-primary:hover,
+          .btn-primary:focus,
+          .btn-primary:active {
+            color: #000f06;
+            background-color: #b7e500; /* Darker shade */
+            border-color: #b7e500;
+          }
+
   YAML
 }
 
