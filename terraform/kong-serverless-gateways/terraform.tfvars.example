@@ -3,9 +3,6 @@
 # Required - Get from Konnect UI: Personal Access Token
 # konnect_personal_access_token = "REPLACE_ME"
 
-# Required - System Account ID for access token creation
-# system_account_id = "REPLACE_ME"
-
 # Number of students to provision (default: 5)
 student_count = 5
 
@@ -23,3 +20,12 @@ student_name_prefix = "student"
 
 # Optional: Control plane description
 # control_plane_description = "Serverless gateway for workshop student"
+
+# ── SSO/OIDC Configuration ────────────────────────────────────────────────────
+# Set enable_sso_config = false if you already have an identity provider configured
+
+enable_sso_config                = true              # Set to false if identity provider already exists
+workshop_sso_oidc_org_login_path = "<REPLACE_ME>"   # MANDATORY: OIDC login path for your workshop
+# workshop_sso_oidc_issuer       = "https://workshop-idp.com"    # Optional: defaults to workshop-idp.com
+# workshop_sso_oidc_client_id    = "workshop-client-12345"       # Optional: defaults to workshop-client-12345  
+# workshop_sso_oidc_client_secret = "L2bQ8nZ5yX1wJ"               # Optional: defaults to L2bQ8nZ5yX1wJ

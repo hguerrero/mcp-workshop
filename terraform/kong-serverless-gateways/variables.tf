@@ -1,3 +1,15 @@
+variable "workshop_system_account_name" {
+  description = "Name for the workshop system account"
+  type        = string
+  default     = "Data Path Workshop System Account"
+}
+
+variable "workshop_system_account_description" {
+  description = "Description for the workshop system account"
+  type        = string
+  default     = "System account for Kong Data Path Workshop automation"
+}
+
 variable "student_count" {
   description = "Number of students to provision serverless gateways for"
   type        = number
@@ -31,7 +43,35 @@ variable "control_plane_description" {
   default     = "Serverless gateway for workshop student"
 }
 
-variable "system_account_id" {
-  description = "System account ID for creating access token"
+# ── SSO/OIDC Configuration ────────────────────────────────────────────────────
+
+variable "enable_sso_config" {
+  description = "Whether to create and configure SSO/OIDC identity provider. Set to false if you already have an identity provider configured."
+  type        = bool
+  default     = true
+}
+
+variable "workshop_sso_oidc_org_login_path" {
+  description = "OIDC login path for the organization SSO (mandatory when enable_sso_config is true)"
   type        = string
+  default     = ""
+}
+
+variable "workshop_sso_oidc_issuer" {
+  description = "OIDC issuer URL for SSO configuration"
+  type        = string
+  default     = "https://workshop-idp.com"
+}
+
+variable "workshop_sso_oidc_client_id" {
+  description = "OIDC client ID for SSO configuration"
+  type        = string
+  default     = "workshop-client-12345"
+}
+
+variable "workshop_sso_oidc_client_secret" {
+  description = "OIDC client secret for SSO configuration"
+  type        = string
+  sensitive   = true
+  default     = "L2bQ8nZ5yX1wJ"
 }
