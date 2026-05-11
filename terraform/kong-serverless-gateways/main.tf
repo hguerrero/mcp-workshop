@@ -224,7 +224,7 @@ resource "konnect_gateway_config_store_secret" "konnect_mcp_spat" {
   control_plane_id = konnect_gateway_control_plane.serverless_cp[each.key].id
   config_store_id  = konnect_gateway_config_store.student_config_store[each.key].id
   key              = "konnect-mcp-spat"
-  value            = konnect_system_account_access_token.token.token
+  value            = "Authorization: Bearer ${konnect_system_account_access_token.token.token}"
 }
 
 # Global CORS plugin for each student control plane
