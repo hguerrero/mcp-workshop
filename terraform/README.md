@@ -1,4 +1,4 @@
-# terraform/kong-serverless-gateways
+# terraform
 
 Terraform module for provisioning per-student Konnect environments for the Kong MCP Workshop series. Run this once before a workshop session to create an isolated, fully configured Konnect environment for each student.
 
