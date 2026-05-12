@@ -18,7 +18,7 @@ spec:
         reserved: 0
   workshops:
   - alias: "lab1"
-    expires: 30m
+    expires: 90m
     initial: 0
     name: lab-mcp-conversion
     orphaned: 5m
@@ -28,14 +28,14 @@ spec:
       namespace: hguerreroo
     reserved: 0
   - alias: "lab2"
-    expires: 30m
+    expires: 90m
     initial: 0
     name: lab-mcp-passthrough
     orphaned: 5m
     overdue: 2m
     reserved: 0
   - alias: "lab3"
-    expires: 30m
+    expires: 90m
     initial: 0
     name: lab-mcp-registry
     orphaned: 5m
