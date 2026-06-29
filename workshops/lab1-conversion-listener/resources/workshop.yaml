@@ -3,7 +3,7 @@ kind: Workshop
 metadata:
   name: lab-mcp-conversion
 spec:
-  title: "Kong MCP — Conversion Listener"
+  title: "Kong MCP — Lab 1: Conversion Listener"
   description: >
     Turn any REST API into an MCP server using Kong's AI MCP Proxy Plugin in
     conversion-listener mode. No upstream changes required. Includes a Mocking

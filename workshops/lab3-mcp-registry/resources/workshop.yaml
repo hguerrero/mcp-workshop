@@ -3,7 +3,7 @@ kind: Workshop
 metadata:
   name: lab-mcp-registry
 spec:
-  title: "Kong MCP — Registry & Governance"
+  title: "Kong MCP — Lab 3: Registry & Governance"
   description: >
     Centralize MCP server distribution with the Konnect MCP Registry. Create a
     registry, publish server entries, expose it read-only through Kong, and wire

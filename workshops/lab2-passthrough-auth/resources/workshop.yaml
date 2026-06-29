@@ -3,7 +3,7 @@ kind: Workshop
 metadata:
   name: lab-mcp-passthrough
 spec:
-  title: "Kong MCP — Passthrough + Auth"
+  title: "Kong MCP — Lab 2: Passthrough + Auth"
   description: >
     Front an existing MCP server with Kong Gateway using passthrough-listener mode,
     OAuth2/PKCE validation via Kong Identity, and upstream token injection from
