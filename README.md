@@ -19,7 +19,7 @@ The series is split into three independent labs. Each can be run on its own; Lab
 ## Repository Layout
 
 ```
-kong--mcp-workshop/
+kong-mcp-workshop/
 ├── workshops/
 │   ├── lab1-conversion-listener/
 │   │   ├── resources/workshop.yaml       # Educates Workshop CRD
@@ -42,24 +42,12 @@ kong--mcp-workshop/
 │           ├── content/                  # Markdown pages (00–05)
 │           └── static/images/            # Screenshot assets for Lab 3
 │
-├── decK/
-│   └── konnect-mcp/
-│       └── config.yaml               # Declarative Kong config for Lab 2 (passthrough + auth)
-│
-└── terraform/
-    ├── gke-educates/                 # Instructor: provision GKE cluster for Educates
-    │   ├── main.tf
-    │   ├── variables.tf
-    │   ├── outputs.tf
-    │   ├── provider.tf
-    │   └── terraform.tfvars.example
-    │
-    └── kong-serverless-gateways/    # Instructor: provision per-student Konnect environments
-        ├── main.tf
-        ├── variables.tf
-        ├── outputs.tf
-        ├── provider.tf
-        └── terraform.tfvars.example
+└── terraform/                        # Instructor: provision per-student Konnect environments
+    ├── main.tf
+    ├── variables.tf
+    ├── outputs.tf
+    ├── provider.tf
+    └── terraform.tfvars.example
 ```
 
 ---
@@ -76,14 +64,14 @@ Each lab specifies its own prerequisites in the Workshop Overview page. The comm
 
 ### For Instructors
 
-Before running a session you need to provision one isolated Konnect environment per student. The [`terraform/kong-serverless-gateways/`](terraform/kong-serverless-gateways/) module handles this. Each student environment includes a Konnect Serverless Gateway, a Kong Identity auth server and pre-registered client application, and a Konnect Config Store and Vault (prefix `ai`) for upstream secret injection.
+Before running a session you need to provision one isolated Konnect environment per student. The [`terraform/`](terraform/) module handles this. Each student environment includes a Konnect Serverless Gateway, a Kong Identity auth server and pre-registered client application, and a Konnect Config Store and Vault (prefix `ai`) for upstream secret injection.
 
 **Quick start:**
 
 ```bash
-cd terraform/kong-serverless-gateways
+cd terraform
 cp terraform.tfvars.example terraform.tfvars
-# Edit terraform.tfvars — set konnect_personal_access_token, system_account_id, and student_count
+# Edit terraform.tfvars — set konnect_personal_access_token and student_count
 terraform init
 terraform plan
 terraform apply
@@ -92,14 +80,13 @@ terraform apply
 After `apply`, extract the per-student values to distribute:
 
 ```bash
-terraform output serverless_gateway_urls   # → $PROXY per student
-terraform output auth_server_urls          # → $KONG_IDENTITY_ISSUER per student
-terraform output application_client_ids    # → $KONG_MCP_CLIENT_ID per student
+terraform output serverless_gateway_urls        # → $PROXY per student
+terraform output auth_server_urls               # → $KONG_IDENTITY_ISSUER per student
+terraform output application_client_ids         # → $KONG_MCP_CLIENT_ID per student
+terraform output -json system_account_access_token  # → $KONNECT_TOKEN
 ```
 
-See the [Terraform README](terraform/kong-serverless-gateways/README.md) for the full variable reference, output descriptions, and teardown instructions.
-
-The Educates cluster that serves the lab instructions is provisioned separately by the [`terraform/gke-educates/`](terraform/gke-educates/) module. See its [README](terraform/gke-educates/README.md) for setup instructions.
+The Educates cluster that serves the lab instructions is provisioned separately (GKE + Educates operator). Refer to your internal cluster setup documentation.
 
 > **Note:** Terraform provisions the **Konnect infrastructure** (gateways, auth servers, vaults). The workshop instructions themselves — the step-by-step lab content students follow — are delivered via the Educates platform. See the next section for how to publish and deploy those.
 
@@ -189,22 +176,6 @@ educates delete-cluster --all
 
 ---
 
-## decK Config (Lab 2)
-
-The `decK/konnect-mcp/config.yaml` file is a ready-to-sync declarative Kong configuration for Lab 2. It covers the full three-plugin stack (AI MCP Proxy → Request Transformer Advanced → AI MCP OAuth2) and is useful for automated environment setup or as a reference when following the Konnect UI steps.
-
-Before syncing, replace the two placeholders:
-
-```bash
-# $KONG_IDENTITY_ISSUER  — issuer URL of the provisioned Kong Identity auth server
-# $KONG_PROXY_HOST       — public hostname of your Kong Gateway proxy
-
-deck gateway sync decK/konnect-mcp/config.yaml \
-  --konnect-token $KONNECT_TOKEN \
-  --konnect-control-plane-name $CP_NAME
-```
-
----
 
 ## Environment Variables Reference
 
